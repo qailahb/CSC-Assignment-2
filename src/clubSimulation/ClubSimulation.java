@@ -60,6 +60,7 @@ public class ClubSimulation {
 	    g.add(txt);
 	    counterDisplay = new CounterDisplay(caught, missed,scr,tallys);      //thread to update score
        
+		//edits
 	    //Add start, pause and exit buttons
 	    JPanel b = new JPanel();
         b.setLayout(new BoxLayout(b, BoxLayout.LINE_AXIS)); 
