@@ -16,9 +16,9 @@ public class ClubSimulation {
    	static int frameX=400;
 	static int frameY=500;
 	static int yLimit=400;
-	static int gridX=10; //number of x grids in club - default value if not provided on command line
-	static int gridY=10; //number of y grids in club - default value if not provided on command line
-	static int max=5; //max number of customers - default value if not provided on command line
+	static int gridX=20; //number of x grids in club - default value if not provided on command line
+	static int gridY=20; //number of y grids in club - default value if not provided on command line
+	static int max=50; //max number of customers - default value if not provided on command line
 	
 	static Clubgoer[] patrons; // array for customer threads
 	static PeopleLocation [] peopleLocations;  //array to keep track of where customers are
@@ -31,6 +31,8 @@ public class ClubSimulation {
 	
 	private static int maxWait=1200; //for the slowest customer
 	private static int minWait=500; //for the fastest cutomer
+
+	private static CountDownLatch startLatch;
 
 	public static void setupGUI(int frameX,int frameY,int [] exits) {
 		// Frame initialize and dimensions
@@ -64,17 +66,19 @@ public class ClubSimulation {
 	    //Add start, pause and exit buttons
 	    JPanel b = new JPanel();
         b.setLayout(new BoxLayout(b, BoxLayout.LINE_AXIS)); 
+
+	
         JButton startB = new JButton("Start");
-        
 		// add the listener to the jbutton to handle the "pressed" event
 		startB.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e)  {
-			    	  	// THIS DOES NOTHING - MUST BE FIXED  	  
+				// THIS DOES NOTHING - MUST BE FIXED 
+				startSimulation();
+				startB.setEnabled(false);    	  	 	  
 		    }
 		   });
 			
-			final JButton pauseB = new JButton("Pause ");;
-			
+			final JButton pauseB = new JButton("Pause ");	
 			// add the listener to the jbutton to handle the "pressed" event
 			pauseB.addActionListener(new ActionListener() {
 		      public void actionPerformed(ActionEvent e) {
@@ -90,6 +94,7 @@ public class ClubSimulation {
 			      }
 			    });
 
+		// Adds buttons to panel		
 		b.add(startB);
 		b.add(pauseB);
 		b.add(endB);
@@ -114,6 +119,8 @@ public class ClubSimulation {
 			max=Integer.parseInt(args[3]); // max people allowed in club
 		}
 		
+		startLatch = new CountDownLatch(noClubgoers);
+
 		//hardcoded exit doors
 		int [] exit = {0,(int) gridY/2-1};  //once-cell wide door on left
 				
@@ -129,9 +136,9 @@ public class ClubSimulation {
         for (int i=0;i<noClubgoers;i++) {
         		peopleLocations[i]=new PeopleLocation(i);
         		int movingSpeed=(int)(Math.random() * (maxWait-minWait)+minWait); //range of speeds for customers
-    			patrons[i] = new Clubgoer(i,peopleLocations[i],movingSpeed);
+    			patrons[i] = new Clubgoer(i,peopleLocations[i],movingSpeed, startLatch);
     		}
-		           
+    
 		setupGUI(frameX, frameY,exit);  //Start Panel thread - for drawing animation
         //start all the threads
 		Thread t = new Thread(clubView); 
@@ -139,10 +146,12 @@ public class ClubSimulation {
       	//Start counter thread - for updating counters
       	Thread s = new Thread(counterDisplay);  
       	s.start();
+	}
       	
-      	for (int i=0;i<noClubgoers;i++) {
-			patrons[i].start();
-		}
+		public static void startSimulation() {
+			for (int i=0;i<noClubgoers;i++) {
+				patrons[i].start();
+			}
  	}
 
 }

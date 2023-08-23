@@ -23,9 +23,9 @@ public class Clubgoer extends Thread {
 	private boolean wantToLeave;
 	
 	private int ID; //thread ID 
-
+	private CountDownLatch startLatch;
 	
-	Clubgoer( int ID,  PeopleLocation loc,  int speed) {
+	Clubgoer( int ID,  PeopleLocation loc,  int speed, CountDownLatch startLatch) {
 		this.ID=ID;
 		movingSpeed=speed; //range of speeds for customers
 		this.myLocation = loc; //for easy lookups
@@ -33,6 +33,7 @@ public class Clubgoer extends Thread {
 		thirsty=true; //thirsty when arrive
 		wantToLeave=false;	 //want to stay when arrive
 		rand=new Random();
+		this.startLatch=startLatch;
 	}
 	
 	//getter
@@ -57,7 +58,9 @@ public class Clubgoer extends Thread {
         
     }
 	private void startSim() {
-		// THIS DOES NOTHING - MUST BE FIXED  	
+		// THIS DOES NOTHING - MUST BE FIXED  
+		startLatch.countDown(); 
+	
         
     }
 	
