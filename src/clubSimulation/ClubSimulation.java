@@ -12,13 +12,13 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ClubSimulation {
-	static int noClubgoers=20;
+	static int noClubgoers=40;
    	static int frameX=400;
 	static int frameY=500;
 	static int yLimit=400;
 	static int gridX=20; //number of x grids in club - default value if not provided on command line
 	static int gridY=20; //number of y grids in club - default value if not provided on command line
-	static int max=50; //max number of customers - default value if not provided on command line
+	static int max=25; //max number of customers - default value if not provided on command line
 	
 	static Clubgoer[] patrons; // array for customer threads
 	static PeopleLocation [] peopleLocations;  //array to keep track of where customers are
@@ -33,6 +33,8 @@ public class ClubSimulation {
 	private static int minWait=500; //for the fastest cutomer
 
 	private static CountDownLatch startLatch;
+
+	private static AtomicBoolean pause = new AtomicBoolean(false);
 
 	public static void setupGUI(int frameX,int frameY,int [] exits) {
 		// Frame initialize and dimensions
@@ -82,7 +84,14 @@ public class ClubSimulation {
 			// add the listener to the jbutton to handle the "pressed" event
 			pauseB.addActionListener(new ActionListener() {
 		      public void actionPerformed(ActionEvent e) {
-		    		// THIS DOES NOTHING - MUST BE FIXED  	
+		    		// THIS DOES NOTHING - MUST BE FIXED  
+					if (pause.get()) {
+						pause.set(false);
+					}
+					else {
+						pause.set(true);
+					}
+					// pause.set(!pause.get());
 		      }
 		    });
 			
@@ -136,7 +145,7 @@ public class ClubSimulation {
         for (int i=0;i<noClubgoers;i++) {
         		peopleLocations[i]=new PeopleLocation(i);
         		int movingSpeed=(int)(Math.random() * (maxWait-minWait)+minWait); //range of speeds for customers
-    			patrons[i] = new Clubgoer(i,peopleLocations[i],movingSpeed, startLatch);
+    			patrons[i] = new Clubgoer(i,peopleLocations[i],movingSpeed, startLatch, pause);
     		}
     
 		setupGUI(frameX, frameY,exit);  //Start Panel thread - for drawing animation
