@@ -10,6 +10,8 @@ import java.awt.event.ActionListener;
 import java.util.Random;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ClubSimulation {
 	static int noClubgoers=40;
@@ -32,9 +34,10 @@ public class ClubSimulation {
 	private static int maxWait=1200; //for the slowest customer
 	private static int minWait=500; //for the fastest cutomer
 
+	// New declared variables
 	private static CountDownLatch startLatch;
-
 	private static AtomicBoolean pause = new AtomicBoolean(false);
+	//private static Lock entryLock = new ReentrantLock();
 
 	public static void setupGUI(int frameX,int frameY,int [] exits) {
 		// Frame initialize and dimensions
@@ -161,6 +164,17 @@ public class ClubSimulation {
 			for (int i=0;i<noClubgoers;i++) {
 				patrons[i].start();
 			}
+
+		}	
+				//entranceAndCapacityLock.lock(); // Acquire the lock for entrance and club capacity
+				//try {
+				//	if (!pause.get()) {
+				//			patrons[i].start(); // Start the patron thread
+				//	}
+				//} finally {
+				//	entranceAndCapacityLock.unlock(); // Release the lock		
+			
+			
  	}
 
-}
+

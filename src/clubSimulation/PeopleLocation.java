@@ -43,13 +43,13 @@ public class PeopleLocation  { // this is a separate class so don't have to acce
 	}
 
 	//getter
-	public  int getX() { return location.getX();}	
+	synchronized public  int getX() { return location.getX();}	
 	
 	//getter
-	public  int getY() {	return location.getY();	}
+	synchronized public  int getY() {	return location.getY();	}
 	
 	//getter
-	public  int getID() {	return ID;	}
+	synchronized public  int getID() {	return ID;	}
 
 	//getter
 	public  synchronized boolean inRoom() {
