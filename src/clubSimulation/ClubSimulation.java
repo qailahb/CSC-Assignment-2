@@ -37,7 +37,7 @@ public class ClubSimulation {
 	// New declared variables
 	private static CountDownLatch startLatch;
 	private static AtomicBoolean pause = new AtomicBoolean(false);
-	//private static Lock entryLock = new ReentrantLock();
+	private final static Object entryLock = new Object();
 
 	public static void setupGUI(int frameX,int frameY,int [] exits) {
 		// Frame initialize and dimensions
@@ -123,6 +123,7 @@ public class ClubSimulation {
 
 	public static void main(String[] args) throws InterruptedException {
 		
+
 		//deal with command line arguments if provided
 		if (args.length==4) {
 			noClubgoers=Integer.parseInt(args[0]);  //total people to enter room
@@ -161,18 +162,19 @@ public class ClubSimulation {
 	}
       	
 		public static void startSimulation() {
+
 			for (int i=0;i<noClubgoers;i++) {
 				patrons[i].start();
 			}
 
 		}	
-				//entranceAndCapacityLock.lock(); // Acquire the lock for entrance and club capacity
+				//entry.lock(); // Acquire the lock for entrance and club capacity
 				//try {
 				//	if (!pause.get()) {
 				//			patrons[i].start(); // Start the patron thread
 				//	}
 				//} finally {
-				//	entranceAndCapacityLock.unlock(); // Release the lock		
+				//	entryLock.unlock(); // Release the lock		
 			
 			
  	}

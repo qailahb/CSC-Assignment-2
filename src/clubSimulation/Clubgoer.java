@@ -63,6 +63,7 @@ public class Clubgoer extends Thread {
 			Thread.sleep(100);
 		}
     }
+	
 	private void startSim() {
 		// THIS DOES NOTHING - MUST BE FIXED  
 		startLatch.countDown(); 
@@ -126,7 +127,7 @@ public class Clubgoer extends Thread {
 		}
 	}
 	
-	//wandering about  in the club
+	//wandering about in the club
 		private void wander() throws InterruptedException {		
 			for(int i=0;i<2;i++) { ////wander for two steps
 				int x_mv= rand.nextInt(3)-1; //-1,0 or 1

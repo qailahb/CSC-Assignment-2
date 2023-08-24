@@ -3,6 +3,8 @@
 
 package clubSimulation;
 
+import java.util.concurrent.locks.*;
+
 //This class represents the club as a grid of GridBlocks
 public class ClubGrid {
 	private GridBlock [][] Blocks;
@@ -17,6 +19,10 @@ public class ClubGrid {
 	
 	private PeopleCounter counter;
 	
+	// Added code
+	private Lock entranceLock = new ReentrantLock();
+	private Lock exitLock = new ReentrantLock();
+
 	ClubGrid(int x, int y, int [] exitBlocks,PeopleCounter c) throws InterruptedException {
 		if (x<minX) x=minX; //minimum x
 		if (y<minY) y=minY; //minimum x
@@ -72,11 +78,18 @@ public class ClubGrid {
 	
 	public GridBlock enterClub(PeopleLocation myLocation) throws InterruptedException  {
 		counter.personArrived(); //add to counter of people waiting 
+		entranceLock.lock();
+
+		try {
 		entrance.get(myLocation.getID());
 		counter.personEntered(); //add to counter
 		myLocation.setLocation(entrance);
 		myLocation.setInRoom(true);
 		return entrance;
+		}
+		finally {
+			entranceLock.unlock();
+		}
 	}
 	
 	
@@ -107,11 +120,18 @@ public class ClubGrid {
 	} 
 	
 
-	public  void leaveClub(GridBlock currentBlock,PeopleLocation myLocation)   {
+	public void leaveClub(GridBlock currentBlock,PeopleLocation myLocation)   {
 			currentBlock.release();
 			counter.personLeft(); //add to counter
 			myLocation.setInRoom(false);
-			entrance.notifyAll();
+
+			exitLock.lock(); try {
+				exit.notifyAll();
+			}
+			finally {
+				exitLock.unlock();
+			}
+			// entrance.notifyAll();
 	}
 
 	public GridBlock getExit() {
