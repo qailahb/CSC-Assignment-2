@@ -2,7 +2,7 @@
 
 package clubSimulation;
 // the main class, starts all threads
-import javax.swing.*;
+import javax.swing.* ;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
