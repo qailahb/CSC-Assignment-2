@@ -11,10 +11,6 @@ import java.util.Random;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-// NEW - Added imports
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 public class ClubSimulation {
 	static int noClubgoers=40;
    	static int frameX=400;
@@ -193,5 +189,3 @@ public class ClubSimulation {
 		}			
 					
  	}
-
-
