@@ -3,6 +3,7 @@
 
 package clubSimulation;
 
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.*;
 
 //This class represents the club as a grid of GridBlocks
@@ -19,7 +20,7 @@ public class ClubGrid {
 	
 	private PeopleCounter counter;
 	
-	// Added code
+	// NEW - Added code
 	private Lock entranceLock = new ReentrantLock();
 	private Lock exitLock = new ReentrantLock();
 
@@ -76,16 +77,17 @@ public class ClubGrid {
 		return true;
 	}
 	
+	// NEW
 	public GridBlock enterClub(PeopleLocation myLocation) throws InterruptedException  {
 		counter.personArrived(); //add to counter of people waiting 
 		entranceLock.lock();
 
 		try {
-		entrance.get(myLocation.getID());
-		counter.personEntered(); //add to counter
-		myLocation.setLocation(entrance);
-		myLocation.setInRoom(true);
-		return entrance;
+			entrance.get(myLocation.getID());
+			counter.personEntered(); //add to counter
+			myLocation.setLocation(entrance);
+			myLocation.setInRoom(true);
+			return entrance;
 		}
 		finally {
 			entranceLock.unlock();
@@ -119,14 +121,14 @@ public class ClubGrid {
 		return newBlock;
 	} 
 	
-
+	// NEW
 	public void leaveClub(GridBlock currentBlock,PeopleLocation myLocation)   {
-			currentBlock.release();
-			counter.personLeft(); //add to counter
-			myLocation.setInRoom(false);
-
-			exitLock.lock(); try {
-				exit.notifyAll();
+			exitLock.lock(); 
+			
+			try {
+				currentBlock.release();
+				counter.personLeft(); //add to counter
+				myLocation.setInRoom(false);
 			}
 			finally {
 				exitLock.unlock();

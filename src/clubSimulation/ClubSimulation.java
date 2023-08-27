@@ -2,7 +2,7 @@
 
 package clubSimulation;
 // the main class, starts all threads
-import javax.swing.* ;
+import javax.swing.*;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -10,6 +10,8 @@ import java.awt.event.ActionListener;
 import java.util.Random;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+// NEW - Added imports
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -20,7 +22,7 @@ public class ClubSimulation {
 	static int yLimit=400;
 	static int gridX=20; //number of x grids in club - default value if not provided on command line
 	static int gridY=20; //number of y grids in club - default value if not provided on command line
-	static int max=25; //max number of customers - default value if not provided on command line
+	static int max=7; //max number of customers - default value if not provided on command line
 	
 	static Clubgoer[] patrons; // array for customer threads
 	static PeopleLocation [] peopleLocations;  //array to keep track of where customers are
@@ -37,7 +39,8 @@ public class ClubSimulation {
 	// New declared variables
 	private static CountDownLatch startLatch;
 	private static AtomicBoolean pause = new AtomicBoolean(false);
-	private final static Object entryLock = new Object();
+	private static Semaphore capacity = new Semaphore(max); // Control max patrons inside club
+	private static BlockingQueue<Clubgoer> waitingQueue = new LinkedBlockingQueue<>(); // Manage waiting patrons
 
 	public static void setupGUI(int frameX,int frameY,int [] exits) {
 		// Frame initialize and dimensions
@@ -67,27 +70,27 @@ public class ClubSimulation {
 	    g.add(txt);
 	    counterDisplay = new CounterDisplay(caught, missed,scr,tallys);      //thread to update score
        
-		//edits
 	    //Add start, pause and exit buttons
 	    JPanel b = new JPanel();
         b.setLayout(new BoxLayout(b, BoxLayout.LINE_AXIS)); 
-
-	
         JButton startB = new JButton("Start");
+
 		// add the listener to the jbutton to handle the "pressed" event
 		startB.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e)  {
-				// THIS DOES NOTHING - MUST BE FIXED 
+				// NEW - FIXED
 				startSimulation();
-				startB.setEnabled(false);    	  	 	  
+				startB.setEnabled(false); 	
+				
 		    }
 		   });
 			
 			final JButton pauseB = new JButton("Pause ");	
+			
 			// add the listener to the jbutton to handle the "pressed" event
 			pauseB.addActionListener(new ActionListener() {
 		      public void actionPerformed(ActionEvent e) {
-		    		// THIS DOES NOTHING - MUST BE FIXED  
+		    		// NEW - FIXED  
 					if (pause.get()) {
 						pause.set(false);
 					}
@@ -131,8 +134,6 @@ public class ClubSimulation {
 			gridY=Integer.parseInt(args[2]); // No. of Y grid cells  
 			max=Integer.parseInt(args[3]); // max people allowed in club
 		}
-		
-		startLatch = new CountDownLatch(noClubgoers);
 
 		//hardcoded exit doors
 		int [] exit = {0,(int) gridY/2-1};  //once-cell wide door on left
@@ -146,37 +147,51 @@ public class ClubSimulation {
 		
 		Random rand = new Random();
 
-        for (int i=0;i<noClubgoers;i++) {
+		// NEW
+		startLatch = new CountDownLatch(noClubgoers);
+
+        for (int i=0; i<noClubgoers; i++) {
         		peopleLocations[i]=new PeopleLocation(i);
         		int movingSpeed=(int)(Math.random() * (maxWait-minWait)+minWait); //range of speeds for customers
     			patrons[i] = new Clubgoer(i,peopleLocations[i],movingSpeed, startLatch, pause);
     		}
     
 		setupGUI(frameX, frameY,exit);  //Start Panel thread - for drawing animation
-        //start all the threads
+        
+		//start all the threads
 		Thread t = new Thread(clubView); 
       	t.start();
-      	//Start counter thread - for updating counters
+      	
+		//Start counter thread - for updating counters
       	Thread s = new Thread(counterDisplay);  
       	s.start();
 	}
       	
+		// NEW
 		public static void startSimulation() {
 
-			for (int i=0;i<noClubgoers;i++) {
-				patrons[i].start();
+			for (int i=0; i<noClubgoers; i++) {
+				if (capacity.tryAcquire()) {
+					patrons[i].start();
+				} else {
+					waitingQueue.add(patrons[i]);
+				}
 			}
 
-		}	
-				//entry.lock(); // Acquire the lock for entrance and club capacity
-				//try {
-				//	if (!pause.get()) {
-				//			patrons[i].start(); // Start the patron thread
-				//	}
-				//} finally {
-				//	entryLock.unlock(); // Release the lock		
-			
-			
+			new Thread(() -> {
+				while (!Thread.currentThread().isInterrupted()) {
+					try {
+						Clubgoer clubgoer = waitingQueue.take();
+						capacity.acquire();
+						clubgoer.start();
+					} catch (InterruptedException ex) {
+						Thread.currentThread().interrupt();
+					}
+				}
+			}).start();
+
+		}			
+					
  	}
 
 
