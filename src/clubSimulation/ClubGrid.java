@@ -3,9 +3,6 @@
 
 package clubSimulation;
 
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.*;
-
 //This class represents the club as a grid of GridBlocks
 public class ClubGrid {
 	private GridBlock [][] Blocks;
@@ -19,10 +16,6 @@ public class ClubGrid {
 	private final static int minY =5;//minimum y dimension
 	
 	private PeopleCounter counter;
-	
-	// NEW - Added code
-	private Lock entranceLock = new ReentrantLock();
-	private Lock exitLock = new ReentrantLock();
 
 	ClubGrid(int x, int y, int [] exitBlocks,PeopleCounter c) throws InterruptedException {
 		if (x<minX) x=minX; //minimum x
@@ -53,11 +46,11 @@ public class ClubGrid {
 		}
 	}
 	
-		public  int getMaxX() {
+	public  int getMaxX() {
 		return x;
 	}
 	
-		public int getMaxY() {
+	public int getMaxY() {
 		return y;
 	}
 
@@ -79,7 +72,22 @@ public class ClubGrid {
 	
 	// NEW
 	public GridBlock enterClub(PeopleLocation myLocation) throws InterruptedException  {
-		counter.personArrived(); //add to counter of people waiting 
+		// Synchronized entrance gridblock 
+		synchronized(entrance) {
+			counter.personArrived(); //add to counter
+			while ( (counter.overCapacity() ) || (!entrance.get(myLocation.getID())) ) {
+				entrance.wait();
+			}
+		}
+		// Given code
+		entrance.get(myLocation.getID());
+		counter.personEntered(); //add to counter
+		myLocation.setLocation(entrance);
+		myLocation.setInRoom(true);
+		return entrance;
+
+
+		/**counter.personArrived(); //add to counter of people waiting 
 		entranceLock.lock();
 
 		try {
@@ -91,7 +99,7 @@ public class ClubGrid {
 		}
 		finally {
 			entranceLock.unlock();
-		}
+		}*/
 	}
 	
 	
@@ -109,31 +117,35 @@ public class ClubGrid {
 			return currentBlock;
 		}
 
-		if ((new_x==currentBlock.getX())&&(new_y==currentBlock.getY())) //not actually moving
+		if ((new_x==currentBlock.getX()) && (new_y==currentBlock.getY())) //not actually moving
 			return currentBlock;
 		 
 		GridBlock newBlock = Blocks[new_x][new_y];
 		
 		if (!newBlock.get(myLocation.getID())) return currentBlock; //stay where you are
-			
-		currentBlock.release(); //must release current block
+
+		// NEW
+		// Synchronized entrance gridblock
+		synchronized(entrance) {
+			currentBlock.release();  // releases current block
+			boolean entryBlock = currentBlock.equals(entrance);
+			if (entryBlock) {
+				entrance.notifyAll() ;
+			}
+		myLocation.setLocation(newBlock); // sets new location
+		return newBlock;	
+		}
+
+		/**currentBlock.release(); //must release current block
 		myLocation.setLocation(newBlock);
-		return newBlock;
+		return newBlock;*/
 	} 
 	
-	// NEW
-	public void leaveClub(GridBlock currentBlock,PeopleLocation myLocation)   {
-			exitLock.lock(); 
-			
-			try {
-				currentBlock.release();
-				counter.personLeft(); //add to counter
-				myLocation.setInRoom(false);
-			}
-			finally {
-				exitLock.unlock();
-			}
-			// entrance.notifyAll();
+	public void leaveClub(GridBlock currentBlock,PeopleLocation myLocation)   { 
+		currentBlock.release();
+		counter.personLeft(); //add to counter
+		myLocation.setInRoom(false);
+		entrance.notifyAll();
 	}
 
 	public GridBlock getExit() {

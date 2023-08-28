@@ -12,12 +12,12 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ClubSimulation {
-	static int noClubgoers=40;
+	static int noClubgoers=30;
    	static int frameX=400;
 	static int frameY=500;
 	static int yLimit=400;
-	static int gridX=20; //number of x grids in club - default value if not provided on command line
-	static int gridY=20; //number of y grids in club - default value if not provided on command line
+	static int gridX=10; //number of x grids in club - default value if not provided on command line
+	static int gridY=10; //number of y grids in club - default value if not provided on command line
 	static int max=7; //max number of customers - default value if not provided on command line
 	
 	static Clubgoer[] patrons; // array for customer threads
@@ -33,10 +33,8 @@ public class ClubSimulation {
 	private static int minWait=500; //for the fastest cutomer
 
 	// New declared variables
-	private static CountDownLatch startLatch;
-	private static AtomicBoolean pause = new AtomicBoolean(false);
-	private static Semaphore capacity = new Semaphore(max); // Control max patrons inside club
-	private static BlockingQueue<Clubgoer> waitingQueue = new LinkedBlockingQueue<>(); // Manage waiting patrons
+	public static CountDownLatch startLatch;
+	public static AtomicBoolean pause = new AtomicBoolean(false);
 
 	public static void setupGUI(int frameX,int frameY,int [] exits) {
 		// Frame initialize and dimensions
@@ -75,9 +73,7 @@ public class ClubSimulation {
 		startB.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e)  {
 				// NEW - FIXED
-				startSimulation();
-				startB.setEnabled(false); 	
-				
+				startLatch.countDown();	
 		    }
 		   });
 			
@@ -93,7 +89,6 @@ public class ClubSimulation {
 					else {
 						pause.set(true);
 					}
-					// pause.set(!pause.get());
 		      }
 		    });
 			
@@ -161,31 +156,11 @@ public class ClubSimulation {
 		//Start counter thread - for updating counters
       	Thread s = new Thread(counterDisplay);  
       	s.start();
-	}
-      	
-		// NEW
-		public static void startSimulation() {
 
-			for (int i=0; i<noClubgoers; i++) {
-				if (capacity.tryAcquire()) {
-					patrons[i].start();
-				} else {
-					waitingQueue.add(patrons[i]);
-				}
-			}
+		for (int i=0; i<noClubgoers; i++) {
+			patrons[i].start();
+		}
 
-			new Thread(() -> {
-				while (!Thread.currentThread().isInterrupted()) {
-					try {
-						Clubgoer clubgoer = waitingQueue.take();
-						capacity.acquire();
-						clubgoer.start();
-					} catch (InterruptedException ex) {
-						Thread.currentThread().interrupt();
-					}
-				}
-			}).start();
-
-		}			
+	}			
 					
- 	}
+}

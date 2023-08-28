@@ -21,6 +21,8 @@ public class PeopleLocation  { // this is a separate class so don't have to acce
 		this.ID=ID;
 	}
 	
+	// NEW - synchronized methods 
+
 	//setter
 	public synchronized void setInRoom(boolean in) {
 		this.inRoom.set(in);
@@ -49,13 +51,13 @@ public class PeopleLocation  { // this is a separate class so don't have to acce
 	public synchronized int getY() {	return location.getY();	}
 	
 	//getter
-	public synchronized  int getID() {	return ID;	}
+	public synchronized int getID() {	return ID;	}
 
 	//getter
 	public synchronized boolean inRoom() {
 		return inRoom.get();
 	}
 	//getter and setter
-	public synchronized  Color getColor() { return myColor; }
-	public synchronized  void setColor(Color myColor) { this.myColor= myColor; }
+	public synchronized Color getColor() { return myColor; }
+	public synchronized void setColor(Color myColor) { this.myColor= myColor; }
 }

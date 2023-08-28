@@ -28,8 +28,6 @@ public class Clubgoer extends Thread {
 	private CountDownLatch startLatch;
 	private AtomicBoolean pause;
 	
-
-	
 	Clubgoer( int ID,  PeopleLocation loc,  int speed, CountDownLatch startLatch, AtomicBoolean pause) {
 		this.ID=ID;
 		movingSpeed=speed; //range of speeds for customers
@@ -40,7 +38,7 @@ public class Clubgoer extends Thread {
 		rand=new Random();
 
 		// NEW CODE
-		this.startLatch=startLatch;
+		this.startLatch = startLatch;
 		this.pause = pause;
 	}
 	
@@ -68,8 +66,13 @@ public class Clubgoer extends Thread {
 		}
     }
 	
-	private void startSim() {
+	public void startSim() {
 		// THIS DOES NOTHING - MUST BE FIXED  
+		/**try {
+			ClubSimulation.startLatch.await();
+		}
+		catch(InterruptedException e) {}*/
+
 		startLatch.countDown();  
     }
 	
