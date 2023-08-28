@@ -84,6 +84,9 @@ public class ClubGrid {
 		counter.personEntered(); //add to counter
 		myLocation.setLocation(entrance);
 		myLocation.setInRoom(true);
+
+		//entrance.notifyAll();
+
 		return entrance;
 
 

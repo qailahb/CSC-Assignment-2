@@ -73,7 +73,20 @@ public class ClubSimulation {
 		startB.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e)  {
 				// NEW - FIXED
+				// startLatch decremented by one - all threads wait until simulation started
 				startLatch.countDown();	
+
+				//start all the threads
+				Thread t = new Thread(clubView); 
+				t.start();
+				
+				//Start counter thread - for updating counters
+				Thread s = new Thread(counterDisplay);  
+				s.start();
+
+				for (int i=0; i<noClubgoers; i++) {
+					patrons[i].start();
+				}
 		    }
 		   });
 			
@@ -83,6 +96,7 @@ public class ClubSimulation {
 			pauseB.addActionListener(new ActionListener() {
 		      public void actionPerformed(ActionEvent e) {
 		    		// NEW - FIXED  
+					// Controls state of simulation - toggles between paused or running
 					if (pause.get()) {
 						pause.set(false);
 					}
@@ -150,7 +164,7 @@ public class ClubSimulation {
 		setupGUI(frameX, frameY,exit);  //Start Panel thread - for drawing animation
         
 		//start all the threads
-		Thread t = new Thread(clubView); 
+		/**Thread t = new Thread(clubView); 
       	t.start();
       	
 		//Start counter thread - for updating counters
@@ -159,7 +173,7 @@ public class ClubSimulation {
 
 		for (int i=0; i<noClubgoers; i++) {
 			patrons[i].start();
-		}
+		}*/
 
 	}			
 					

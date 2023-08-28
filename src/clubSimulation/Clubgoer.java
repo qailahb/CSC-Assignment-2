@@ -43,18 +43,18 @@ public class Clubgoer extends Thread {
 	}
 	
 	//getter
-	public  boolean inRoom() {
+	public synchronized boolean inRoom() {
 		return inRoom;
 	}
 	
 	//getter
-	public  int getX() { return currentBlock.getX();}	
+	public synchronized int getX() { return currentBlock.getX();}	
 	
 	//getter
-	public  int getY() {	return currentBlock.getY();	}
+	public synchronized int getY() {	return currentBlock.getY();	}
 	
 	//getter
-	public  int getSpeed() { return movingSpeed; }
+	public synchronized int getSpeed() { return movingSpeed; }
 
 	//setter
 
