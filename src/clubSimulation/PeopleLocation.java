@@ -21,7 +21,7 @@ public class PeopleLocation  { // this is a separate class so don't have to acce
 		this.ID=ID;
 	}
 	
-	// NEW - synchronized methods 
+	// NEW - synchronized all methods 
 
 	//setter
 	public synchronized void setInRoom(boolean in) {
@@ -32,32 +32,46 @@ public class PeopleLocation  { // this is a separate class so don't have to acce
 	public synchronized boolean getArrived() {
 		return arrived.get();
 	}
+
 	public synchronized void setArrived() {
 		this.arrived.set(true);;
 	}
 
-//getter and setter
+	//getter and setter
 	public synchronized GridBlock getLocation() {
 		return location;
 	}
+
 	public synchronized void setLocation(GridBlock location) {
 		this.location = location;
 	}
 
 	//getter
-	public synchronized int getX() { return location.getX();}	
+	public synchronized int getX() { 
+		return location.getX();
+	}	
 	
 	//getter
-	public synchronized int getY() {	return location.getY();	}
+	public synchronized int getY() {	
+		return location.getY();	
+	}
 	
 	//getter
-	public synchronized int getID() {	return ID;	}
+	public synchronized int getID() {	
+		return ID;	
+	}
 
 	//getter
 	public synchronized boolean inRoom() {
 		return inRoom.get();
 	}
+
 	//getter and setter
-	public synchronized Color getColor() { return myColor; }
-	public synchronized void setColor(Color myColor) { this.myColor= myColor; }
+	public synchronized Color getColor() { 
+		return myColor; 
+	}
+
+	public synchronized void setColor(Color myColor) { 
+		this.myColor= myColor; 
+	}
 }

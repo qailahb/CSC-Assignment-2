@@ -10,7 +10,7 @@ run:
 	@echo "Compiling and running application"
 	@$(JAVAC) -d $(BINDIR)/ $(SRCDIR)/*.java
 	@echo "Running ClubSimulation"
-	@$(JAVA) -cp $(BINDIR) clubSimulation/ClubSimulation 30 20 20 7
+	@$(JAVA) -cp $(BINDIR) clubSimulation/ClubSimulation 20 10 10 7
 
 build:
 	@echo "Compiling application"
